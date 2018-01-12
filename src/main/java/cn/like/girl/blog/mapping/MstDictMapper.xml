@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.like.girl.blog.mapper.MstDictMapper" >
+  <resultMap id="BaseResultMap" type="cn.like.girl.blog.entity.MstDict" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="CODE" property="code" jdbcType="VARCHAR" />
+    <result column="NAME" property="name" jdbcType="VARCHAR" />
+    <result column="STATUS" property="status" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, CODE, NAME, STATUS
+  </sql>
+  
+  <select id="findByStatus" parameterType="string" resultMap="BaseResultMap" >
+  	SELECT * FROM MST_DICT WHERE STATUS = #{status, jdbcType=VARCHAR}
+  </select>
+
+
+</mapper>

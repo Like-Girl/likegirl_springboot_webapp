@@ -1,0 +1,85 @@
+server:
+  context-path: /blog
+  port: 8883
+  session:
+    timeout: 900
+
+
+spring:
+  http:
+      encoding:
+        charset: UTF-8
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: NON_NULL
+  redis:
+    pool:
+      min-idle: 100
+      max-idle: 100
+      max-wait: -1
+      max-active: 1000
+    timeout: 259200
+    host: 118.89.144.30
+    port: 6379
+    password: 123456
+
+# 阿里数据源
+druid:
+    type: com.alibaba.druid.pool.DruidDataSource
+    master:
+        url: jdbc:mysql://192.168.179.31:3306/db_mail?characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useUnicode=true
+        driver-class-name: com.mysql.jdbc.Driver
+        username: dev
+        password: 123456
+        initialSize: 5
+        minIdle: 1
+        #maxIdle: 10
+        maxActive: 100
+        maxWait: 60000
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        validationQuery: SELECT 1 FROM DUAL
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        poolPreparedStatements: true
+        maxPoolPreparedStatementPerConnectionSize: 20
+        filters: stat,wall,log4j
+        useGlobalDataSourceStat: true
+    slave:
+        url: jdbc:mysql://192.168.179.32:3306/db_mail?characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useUnicode=true
+        driver-class-name: com.mysql.jdbc.Driver
+        username: dev
+        password: 123456
+        initialSize: 5
+        minIdle: 1
+        #maxIdle: 10
+        maxActive: 100
+        maxWait: 60000
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        validationQuery: SELECT 1 FROM DUAL
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        poolPreparedStatements: true
+        maxPoolPreparedStatementPerConnectionSize: 20
+        filters: stat,wall,log4j
+        useGlobalDataSourceStat: true
+
+mybatis:
+    type-aliases-package: cn.like.girl.blog
+    mapper-locations: classpath:cn/like/girl/blog/mapping/*.xml
+
+logging:
+    level:
+        tk.mybatis: TRACE
+
+
+pagehelper:
+    helperDialect: mysql
+    reasonable: true
+    supportMethodsArguments: true
+    params: count=countSql
+
