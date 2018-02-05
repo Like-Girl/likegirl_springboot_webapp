@@ -1,6 +1,7 @@
 package cn.like.girl.blog.config.database;
 
 
+import tk.mybatis.mapper.common.ConditionMapper;
 import tk.mybatis.mapper.common.Mapper;
 import tk.mybatis.mapper.common.MySqlMapper;
 /**
@@ -11,6 +12,6 @@ import tk.mybatis.mapper.common.MySqlMapper;
  * @author bhz
  * @since 2017年2月8日 下午2:42:49
  */
-public interface BaseMapper<T> extends Mapper<T>, MySqlMapper<T> {
+public interface BaseMapper<T> extends Mapper<T>, MySqlMapper<T> ,ConditionMapper<T> {
 
 }

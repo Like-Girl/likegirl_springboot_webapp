@@ -1,0 +1,55 @@
+spring:
+  redis:
+    pool:
+      min-idle: 100
+      max-idle: 100
+      max-wait: -1
+      max-active: 1000
+    timeout: 259200
+    host: 118.89.144.30
+    port: 6379
+    password: 123456
+
+# 阿里数据源
+druid:
+  type: com.alibaba.druid.pool.DruidDataSource
+  master:
+    url: jdbc:mysql://118.89.144.30:3306/db_blog?characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useUnicode=true
+    driver-class-name: com.mysql.jdbc.Driver
+    username: dev
+    password: 123456
+    initialSize: 5
+    minIdle: 1
+    #maxIdle: 10
+    maxActive: 100
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 20
+    filters: stat,wall,log4j
+    useGlobalDataSourceStat: true
+  slave:
+    url: jdbc:mysql://114.67.226.113:3306/db_blog?characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useUnicode=true
+    driver-class-name: com.mysql.jdbc.Driver
+    username: dev
+    password: 123456
+    initialSize: 5
+    minIdle: 1
+    #maxIdle: 10
+    maxActive: 100
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 20
+    filters: stat,wall,log4j
+    useGlobalDataSourceStat: true

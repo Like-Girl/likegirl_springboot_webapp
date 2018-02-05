@@ -1,5 +1,6 @@
 package cn.like.girl.blog.service;
 
+import org.apache.shiro.codec.Base64;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,17 @@ public class MstDictServiceTest {
     @Test
     public void test3(){
         ValueOperations<String, String> vo = redisTemplate.opsForValue();
-        vo.set("sex", "男");
+        vo.set("sex", "女");
         System.err.println(vo.get("sex"));
+    }
+
+    @Test
+    public void test4(){
+        byte[] bytes = Base64.decode("2AvVhdsgUs0FSA3SDFAdag==");
+        System.out.println("长度:"+bytes.length);
+        for (byte b: bytes
+             ) {
+            System.out.println(b);
+        }
     }
 }

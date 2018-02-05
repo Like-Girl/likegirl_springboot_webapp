@@ -1,4 +1,4 @@
-package cn.like.girl.blog.config.security.credentials;
+package cn.like.girl.blog.config.shiro.credentials;
 
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
