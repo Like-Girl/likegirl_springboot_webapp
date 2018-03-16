@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:th="http://www.w3.org/1999/xhtml"
       xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
 <body>
-<div class="error">您没有权限[${exception.message}]</div>
+<div class="error" th:text="${ '您没有权限[' + exception.message + ']'}">您没有权限[${exception.message}]</div>
 </body>
 </html>

@@ -5,7 +5,7 @@ import tk.mybatis.mapper.annotation.NameStyle;
 import javax.persistence.Table;
 import java.io.Serializable;
 
-@Table(name = "sys_role")
+@Table(name = "sys_roles")
 @NameStyle
 public class Role implements Serializable {
     private Long id;

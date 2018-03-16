@@ -23,6 +23,8 @@ spring:
     suffix: .html
   profiles:
       active: pro
+  aop:
+    proxy-target-class: true
 
 mybatis:
     type-aliases-package: cn.like.girl.blog
@@ -38,4 +40,8 @@ pagehelper:
     reasonable: true
     supportMethodsArguments: true
     params: count=countSql
+
+app:
+  message:
+    basename: classpath:i18n/messages
 

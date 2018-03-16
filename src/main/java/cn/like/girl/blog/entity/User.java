@@ -6,7 +6,7 @@ import javax.persistence.Table;
 import java.io.Serializable;
 
 
-@Table(name = "sys_user")
+@Table(name = "sys_users")
 @NameStyle
 public class User implements Serializable {
     private Long id;

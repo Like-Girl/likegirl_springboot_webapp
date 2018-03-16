@@ -13,5 +13,5 @@ import java.util.List;
  */
 public interface RoleMapper extends BaseMapper<Role> {
 
-    List<String> findRoles(@Param("where") RoleQuery query);
+    List<String> findRoles(@Param("username") String username);
 }

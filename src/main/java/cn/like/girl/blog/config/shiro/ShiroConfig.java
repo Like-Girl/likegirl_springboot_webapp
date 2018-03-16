@@ -1,9 +1,9 @@
 package cn.like.girl.blog.config.shiro;
 
 import at.pollux.thymeleaf.shiro.dialect.ShiroDialect;
-import cn.like.girl.blog.config.shiro.filter.KickoutSessionControlFilter;
+import cn.like.girl.blog.config.shiro.credentials.RetryLimitHashedCredentialsMatcher;
+import cn.like.girl.blog.config.shiro.filter.KickOutSessionControlFilter;
 import cn.like.girl.blog.config.shiro.realm.UserRealm;
-import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator;
 import org.apache.shiro.session.mgt.eis.SessionIdGenerator;
 import org.apache.shiro.session.mgt.quartz.QuartzSessionValidationScheduler;
@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
+import javax.servlet.Filter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -82,7 +83,7 @@ public class ShiroConfig {
     /**
      * 凭证匹配器
      */
-    @Bean
+   /* @Bean
     public HashedCredentialsMatcher hashedCredentialsMatcher() {
         HashedCredentialsMatcher hashedCredentialsMatcher = new HashedCredentialsMatcher();
         //散列算法:这里使用MD5算法;
@@ -91,6 +92,19 @@ public class ShiroConfig {
         hashedCredentialsMatcher.setHashIterations(1024);
         hashedCredentialsMatcher.setStoredCredentialsHexEncoded(true);
         return hashedCredentialsMatcher;
+    }*/
+
+    /**
+     * 凭证匹配器
+     * 增加限制重试策略
+     */
+    @Bean
+    public RetryLimitHashedCredentialsMatcher credentialsMatcher(){
+        RetryLimitHashedCredentialsMatcher credentialsMatcher = new RetryLimitHashedCredentialsMatcher();
+        credentialsMatcher.setHashAlgorithmName("md5");
+        credentialsMatcher.setHashIterations(1024);
+        credentialsMatcher.setStoredCredentialsHexEncoded(true);
+        return credentialsMatcher;
     }
 
     /**
@@ -181,21 +195,25 @@ public class ShiroConfig {
     public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager) {
         ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
         shiroFilterFactoryBean.setSecurityManager(securityManager);
+
+        //自定义拦截器
+        Map<String, Filter> filtersMap = new LinkedHashMap<>();
+        //限制同一帐号同时在线的个数。
+        filtersMap.put("kickout", kickoutSessionControlFilter());
+        shiroFilterFactoryBean.setFilters(filtersMap);
         //拦截器.
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         // 配置不会被拦截的链接 顺序判断
         filterChainDefinitionMap.put("/login", "anon");
         filterChainDefinitionMap.put("/user/login", "anon");
-        filterChainDefinitionMap.put("/css/**", "anon");
-        filterChainDefinitionMap.put("/images/**", "anon");
-        filterChainDefinitionMap.put("/js/**", "anon");
+        filterChainDefinitionMap.put("/static/**", "anon");
         filterChainDefinitionMap.put("/logout", "logout");
         // 如果不设置默认会自动寻找Web工程根目录下的"/login.jsp"页面
         shiroFilterFactoryBean.setLoginUrl("/login");
         //未授权界面;
         shiroFilterFactoryBean.setUnauthorizedUrl("/403");
         // 配置需要验证登录后访问的链接
-        filterChainDefinitionMap.put("/**", "authc");
+        filterChainDefinitionMap.put("/**", "authc,kickout");
         // 从数据库获取
 //        List<AdminMenu> list = systemService.selectAllMenu();
 //
@@ -210,7 +228,7 @@ public class ShiroConfig {
     @DependsOn("lifecycleBeanPostProcessor")
     public UserRealm userRealm(){
         UserRealm userRealm = new UserRealm();
-        userRealm.setCredentialsMatcher(hashedCredentialsMatcher());
+        userRealm.setCredentialsMatcher(credentialsMatcher());
         return userRealm;
     }
 
@@ -259,6 +277,7 @@ public class ShiroConfig {
      */
     @Bean
     @DependsOn({"lifecycleBeanPostProcessor"})
+//    @ConditionalOnMissingBean
     public DefaultAdvisorAutoProxyCreator advisorAutoProxyCreator(){
         DefaultAdvisorAutoProxyCreator advisorAutoProxyCreator = new DefaultAdvisorAutoProxyCreator();
         advisorAutoProxyCreator.setProxyTargetClass(true);
@@ -284,31 +303,26 @@ public class ShiroConfig {
         return new ShiroDialect();
     }
 
+
     /**
      * 限制同一账号登录同时登录人数控制
      *
      */
-    public KickoutSessionControlFilter kickoutSessionControlFilter(){
-        KickoutSessionControlFilter kickoutSessionControlFilter = new KickoutSessionControlFilter();
+    @Bean
+    public KickOutSessionControlFilter kickoutSessionControlFilter(){
+        KickOutSessionControlFilter kickoutSessionControlFilter = new KickOutSessionControlFilter();
         //使用cacheManager获取相应的cache来缓存用户登录的会话；用于保存用户—会话之间的关系的；
-
         //这里我们还是用之前shiro使用的redisManager()实现的cacheManager()缓存管理
-
         //也可以重新另写一个，重新配置缓存时间之类的自定义缓存属性
-
         kickoutSessionControlFilter.setCacheManager(cacheManager());
         //用于根据会话ID，获取会话进行踢出操作的；
-
         kickoutSessionControlFilter.setSessionManager(sessionManager());
         //是否踢出后来登录的，默认是false；即后者登录的用户踢出前者登录的用户；踢出顺序。
-
-        kickoutSessionControlFilter.setKickoutAfter(false);
+        kickoutSessionControlFilter.setKickOutAfter(KickOutSessionControlFilter.KICK_OUT_AFTER);
         //同一个用户最大的会话数，默认1；比如2的意思是同一个用户允许最多同时两个人登录；
-
         kickoutSessionControlFilter.setMaxSession(1);
         //被踢出后重定向到的地址；
-
-        kickoutSessionControlFilter.setKickoutUrl("/kickout");
+        kickoutSessionControlFilter.setKickOutUrl("/kickout");
         return kickoutSessionControlFilter;
     }
 

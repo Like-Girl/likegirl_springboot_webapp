@@ -6,7 +6,7 @@ import javax.persistence.Table;
 import java.io.Serializable;
 
 
-@Table(name = "sys_permission")
+@Table(name = "sys_permissions")
 @NameStyle
 public class Permission implements Serializable {
     private Long id;

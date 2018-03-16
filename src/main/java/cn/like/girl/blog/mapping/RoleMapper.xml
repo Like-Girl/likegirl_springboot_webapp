@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="cn.like.girl.blog.mapper.RoleMapper" >
+<mapper namespace="cn.like.girl.blog.mapper.RoleMapper">
 
-    <select id="findRoles" resultType="String" parameterType="cn.like.girl.blog.entity.query.RoleQuery">
-      SELECT sys_roles.role
-      FROM sys_role
+    <select id="findRoles" resultType="String" parameterType="String">
+        SELECT sys_roles.role
+        FROM sys_users, sys_roles, sys_users_roles
+        WHERE
+            sys_users.username = #{username} AND sys_users.id = sys_users_roles.user_id AND sys_roles.id = sys_users_roles.role_id
     </select>
 
 </mapper>

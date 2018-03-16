@@ -7,6 +7,7 @@ import cn.like.girl.blog.service.PermissionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Service(value = "permissionService")
@@ -16,6 +17,6 @@ public class PermissionServiceImpl extends BaseService implements PermissionServ
 
     @Override
     public Set<String> findPermissions(String username) {
-        return null;
+        return new HashSet<>(permissionMapper.findPermissions(username));
     }
 }

@@ -7,8 +7,8 @@
     <style>.error{color:red;}</style>
 </head>
 <body>
-<div class="error" th:text="${error}"></div>
-<form action="user/login" method="post">
+<div class="error" th:text="${exception}"></div>
+<form action="login" method="post">
     用户名：<input type="text" name="username" /><br/>
     密码：<input type="password" name="password" /><br/>
     <input type="checkbox" name="rememberMe" />记住我<br>

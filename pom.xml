@@ -182,6 +182,12 @@
 			<artifactId>java-uuid-generator</artifactId>
 			<version>${fasterxml.uuid.version}</version>
 		</dependency>
+		<!-- hibernate 验证 -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>5.4.1.Final</version>
+		</dependency>
 		<!-- 公用 -->
 		<dependency>
 			<groupId>javax.servlet</groupId>

@@ -12,5 +12,5 @@ import java.util.List;
  */
 public interface PermissionMapper extends BaseMapper<Permission> {
 
-    List<String> findPermissions(@Param("where") PermissionQuery query);
+    List<String> findPermissions(@Param("username") String username);
 }

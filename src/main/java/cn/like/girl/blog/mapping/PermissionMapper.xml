@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="cn.like.girl.blog.mapper.PermissionMapper" >
+<mapper namespace="cn.like.girl.blog.mapper.PermissionMapper">
 
-    <select id="findPermissions" resultType="String" parameterType="cn.like.girl.blog.entity.query.PermissionQuery">
-
+    <select id="findPermissions" resultType="String" parameterType="String">
+        SELECT p.permission
+        FROM sys_users u, sys_roles r, sys_permissions p, sys_users_roles ur, sys_roles_permissions rp
+        WHERE
+            u.username = #{username} AND u.id = ur.user_id AND r.id = ur.role_id AND r.id = rp.role_id AND p.id = rp.permission_id
     </select>
 
 </mapper>
