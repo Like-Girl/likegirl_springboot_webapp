@@ -38,6 +38,7 @@
 
 		<!--<thymeleaf-layout-dialect.version>2.0.5</thymeleaf-layout-dialect.version>
 		<thymeleaf.version>3.0.6.RELEASE</thymeleaf.version>-->
+		<org.thymeleaf.extras.s4>3.0.2.RELEASE</org.thymeleaf.extras.s4>
 	</properties>
 
 	<dependencies>
@@ -93,6 +94,7 @@
 			<!--<artifactId>shiro-ehcache</artifactId>-->
 			<!--<version>${org.apache.shiro.version}</version>-->
 		<!--</dependency>-->
+		<!-- redis 缓存 -->
 		<dependency>
 			<groupId>org.crazycake</groupId>
 			<artifactId>shiro-redis</artifactId>
@@ -103,6 +105,18 @@
 			<artifactId>thymeleaf-extras-shiro</artifactId>
 			<version>1.2.1</version>
 		</dependency>
+
+		<!-- Spring Security -->
+		<!--<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.thymeleaf.extras</groupId>
+			<artifactId>thymeleaf-extras-springsecurity4</artifactId>
+			<version>${org.thymeleaf.extras.s4}</version>
+		</dependency>-->
+
 		<!-- Thymeleaf模板 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -146,8 +160,8 @@
 			<version>1.1.0</version>
 			<exclusions>
 				<exclusion>
-					<artifactId>mybatis-spring-boot-starter</artifactId>
 					<groupId>org.mybatis.spring.boot</groupId>
+					<artifactId>mybatis-spring-boot-starter</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
