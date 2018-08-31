@@ -6,7 +6,7 @@ spring:
       max-wait: -1
       max-active: 1000
     timeout: 259200
-    host: 118.89.144.30
+    host: 114.67.226.113
     port: 6379
     password: 123456
 
@@ -14,10 +14,10 @@ spring:
 druid:
   type: com.alibaba.druid.pool.DruidDataSource
   master:
-    url: jdbc:mysql://118.89.144.30:3306/db_blog?characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useUnicode=true
+    url: jdbc:mysql://193.112.133.164:3306/likegirl?characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useUnicode=true
     driver-class-name: com.mysql.jdbc.Driver
     username: dev
-    password: 123456
+    password: 123698745
     initialSize: 5
     minIdle: 1
     #maxIdle: 10
@@ -34,10 +34,10 @@ druid:
     filters: stat,wall,log4j
     useGlobalDataSourceStat: true
   slave:
-    url: jdbc:mysql://114.67.226.113:3306/db_blog?characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useUnicode=true
+    url: jdbc:mysql://111.231.93.233:3306/likegirl?characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useUnicode=true
     driver-class-name: com.mysql.jdbc.Driver
     username: dev
-    password: 123456
+    password: 123698745
     initialSize: 5
     minIdle: 1
     #maxIdle: 10

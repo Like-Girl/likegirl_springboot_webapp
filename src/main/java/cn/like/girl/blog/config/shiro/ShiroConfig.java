@@ -4,26 +4,36 @@ import at.pollux.thymeleaf.shiro.dialect.ShiroDialect;
 import cn.like.girl.blog.config.shiro.credentials.RetryLimitHashedCredentialsMatcher;
 import cn.like.girl.blog.config.shiro.filter.KickOutSessionControlFilter;
 import cn.like.girl.blog.config.shiro.realm.UserRealm;
+import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
+import org.apache.shiro.codec.Base64;
+import org.apache.shiro.crypto.CipherService;
+import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator;
 import org.apache.shiro.session.mgt.eis.SessionIdGenerator;
 import org.apache.shiro.session.mgt.quartz.QuartzSessionValidationScheduler;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
+import org.apache.shiro.web.mgt.CookieRememberMeManager;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.web.servlet.Cookie;
 import org.apache.shiro.web.servlet.SimpleCookie;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.crazycake.shiro.RedisCacheManager;
 import org.crazycake.shiro.RedisManager;
 import org.crazycake.shiro.RedisSessionDAO;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
+import javax.annotation.Resource;
 import javax.servlet.Filter;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -52,6 +62,10 @@ public class ShiroConfig {
     private String password;
 
 
+    @Autowired(required = false)
+    private CipherService cipherService;
+
+
     /**
      * redis管理器
      */
@@ -62,7 +76,11 @@ public class ShiroConfig {
         // 端口
         redisManager.setPort(port);
         // 缓存过期时间
-        redisManager.setExpire(1800);
+        // 单位：分钟，建议此处与 Session 过期时间一致或者大于Session过期时间
+        // 此处不设置，redis缓存不会设置过期时间
+        // DefaultWebSessionManager 回话管理器中配置全局session过期时间
+        // 当session 过期，会自动删除redis里缓存的session
+        redisManager.setExpire(30 * 60);
         redisManager.setTimeout(timeout);
         // auth
         redisManager.setPassword(password);
@@ -82,17 +100,23 @@ public class ShiroConfig {
 
     /**
      * 凭证匹配器
+     *
+     * 已弃用，做参考
      */
-   /* @Bean
+//    @Bean
+    @Deprecated
     public HashedCredentialsMatcher hashedCredentialsMatcher() {
         HashedCredentialsMatcher hashedCredentialsMatcher = new HashedCredentialsMatcher();
-        //散列算法:这里使用MD5算法;
+        // 散列算法:这里使用MD5算法;
         hashedCredentialsMatcher.setHashAlgorithmName("md5");
-        //散列的次数
+        // 散列的次数
         hashedCredentialsMatcher.setHashIterations(1024);
         hashedCredentialsMatcher.setStoredCredentialsHexEncoded(true);
         return hashedCredentialsMatcher;
-    }*/
+    }
+
+
+
 
     /**
      * 凭证匹配器
@@ -101,7 +125,9 @@ public class ShiroConfig {
     @Bean
     public RetryLimitHashedCredentialsMatcher credentialsMatcher(){
         RetryLimitHashedCredentialsMatcher credentialsMatcher = new RetryLimitHashedCredentialsMatcher();
+        // 散列算法:这里使用MD5算法;
         credentialsMatcher.setHashAlgorithmName("md5");
+        // 散列的次数
         credentialsMatcher.setHashIterations(1024);
         credentialsMatcher.setStoredCredentialsHexEncoded(true);
         return credentialsMatcher;
@@ -110,6 +136,7 @@ public class ShiroConfig {
     /**
      * 会话ID生成器
      */
+    @Bean
     public JavaUuidSessionIdGenerator sessionIdGenerator() {
         SessionIdGenerator sessionIdGenerator = new JavaUuidSessionIdGenerator();
         return (JavaUuidSessionIdGenerator) sessionIdGenerator;
@@ -118,6 +145,7 @@ public class ShiroConfig {
     /**
      * 会话Cookie模板
      */
+    @Bean
     public SimpleCookie sessionIdCookie() {
         SimpleCookie simpleCookie = new SimpleCookie("sid");
         simpleCookie.setHttpOnly(true);
@@ -143,13 +171,20 @@ public class ShiroConfig {
     /**
      * 会话验证调度器
      *
+     * 描述:shiro提供了会话验证调度器，用于定期的验证会话是否已过期，如果过期将停止会话；
+     * 出于性能考虑，一般情况下都是获取会话时来验证会话是否过期并停止会话的；但是如在web环境中，
+     * 如果用户不主动退出是不知道会话是否过期的，因此需要定期的检测会话是否过期，Shiro提供了会
+     * 话验证调度器SessionValidationScheduler。
+     *
      * @return org.apache.shiro.session.mgt.quartz.QuartzSessionValidationScheduler
      */
     @Bean
-    public QuartzSessionValidationScheduler sessionValidationScheduler(){
+    public QuartzSessionValidationScheduler sessionValidationScheduler(@Qualifier("sessionManager") DefaultWebSessionManager sessionManager){
         QuartzSessionValidationScheduler sessionValidationScheduler = new QuartzSessionValidationScheduler();
-        sessionValidationScheduler.setSessionValidationInterval(1800000L);
-        sessionValidationScheduler.setSessionManager(sessionManager());
+        // default: 60s
+        sessionValidationScheduler.setSessionValidationInterval(60 * 1000L);
+        sessionValidationScheduler.setSessionManager(sessionManager);
+        sessionManager.setSessionValidationScheduler(sessionValidationScheduler);
         return  sessionValidationScheduler;
     }
 
@@ -159,25 +194,32 @@ public class ShiroConfig {
     @Bean
     public DefaultWebSessionManager sessionManager() {
         DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
-        sessionManager.setGlobalSessionTimeout(1800000L);
+        sessionManager.setGlobalSessionTimeout(1 * 60 * 1000L);
         sessionManager.setDeleteInvalidSessions(true);
+//        sessionManager.setSessionValidationScheduler(sessionValidationScheduler());
+        sessionManager.setSessionValidationSchedulerEnabled(true);
         sessionManager.setSessionDAO(redisSessionDAO());
-        sessionManager.setSessionIdCookieEnabled(true);
-        sessionManager.setSessionIdCookie(sessionIdCookie());
+
+        // 此处，设置SecurityManager rememberMeManager() 会异常
+        // 代下一步研究
+//        sessionManager.setSessionIdCookieEnabled(true);
+//        sessionManager.setSessionIdCookie(sessionIdCookie());
         return sessionManager;
     }
 
     /**
      * cookie管理对象;记住我功能
      */
-  /*  @Bean
+    @Bean
     public CookieRememberMeManager rememberMeManager() {
         CookieRememberMeManager cookieRememberMeManager = new CookieRememberMeManager();
-        cookieRememberMeManager.setCookie(rememberMeCookie());
+        cookieRememberMeManager.setCookie(sessionIdCookie());
+        cookieRememberMeManager.setCipherService(cipherService);
         //rememberMe cookie加密的密钥 建议每个项目都不一样 默认AES算法 密钥长度(128 256 512 位)
-//        cookieRememberMeManager.setCipherKey(Base64.decode("2AvVhdsgUs0FSA3SDFAdag=="));
+        cookieRememberMeManager.setCipherKey(Base64.decode("2AvVhdsgUs0FSA3SDFAdag=="));
         return cookieRememberMeManager;
-    }*/
+    }
+
 
 
     /**
@@ -244,7 +286,7 @@ public class ShiroConfig {
         securityManager.setCacheManager(cacheManager());
         // 自定义session管理
         securityManager.setSessionManager(sessionManager());
-        //securityManager.setRememberMeManager(rememberMeManager());//注入记住我管理器
+        securityManager.setRememberMeManager(rememberMeManager());//注入记住我管理器
         return securityManager;
     }
 

@@ -39,9 +39,10 @@ public class IndexController {
     }
 
     @RequestMapping(value = "/login",method = RequestMethod.POST)
-    public String login(User user){
+    public String login(User user,@RequestParam(required = false) Boolean rememberMe){
         Subject subject = SecurityUtils.getSubject();
         UsernamePasswordToken token = new UsernamePasswordToken(user.getUsername(),user.getPassword());
+        token.setRememberMe(rememberMe == null ? false : rememberMe);
         subject.login(token);
         return "redirect:user/list";
     }
