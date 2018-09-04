@@ -149,12 +149,23 @@ public class ShiroConfig {
     public SimpleCookie sessionIdCookie() {
         SimpleCookie simpleCookie = new SimpleCookie("sid");
         simpleCookie.setHttpOnly(true);
+        // 默认就是 -1
+//        simpleCookie.setMaxAge(-1);
+        return simpleCookie;
+    }
+
+    @Bean
+    public SimpleCookie rememberMeCookie(){
+        SimpleCookie simpleCookie = new SimpleCookie("rememberMe");
+        simpleCookie.setHttpOnly(true);
         // 记住密码
         // cookie有效时间7天
         // 单位秒;
         simpleCookie.setMaxAge(604800);
         return simpleCookie;
     }
+
+
 
     /**
      * 会话DAO (redis实现)
@@ -199,11 +210,8 @@ public class ShiroConfig {
 //        sessionManager.setSessionValidationScheduler(sessionValidationScheduler());
         sessionManager.setSessionValidationSchedulerEnabled(true);
         sessionManager.setSessionDAO(redisSessionDAO());
-
-        // 此处，设置SecurityManager rememberMeManager() 会异常
-        // 代下一步研究
-//        sessionManager.setSessionIdCookieEnabled(true);
-//        sessionManager.setSessionIdCookie(sessionIdCookie());
+        sessionManager.setSessionIdCookieEnabled(true);
+        sessionManager.setSessionIdCookie(sessionIdCookie());
         return sessionManager;
     }
 
@@ -213,7 +221,7 @@ public class ShiroConfig {
     @Bean
     public CookieRememberMeManager rememberMeManager() {
         CookieRememberMeManager cookieRememberMeManager = new CookieRememberMeManager();
-        cookieRememberMeManager.setCookie(sessionIdCookie());
+        cookieRememberMeManager.setCookie(rememberMeCookie());
         cookieRememberMeManager.setCipherService(cipherService);
         //rememberMe cookie加密的密钥 建议每个项目都不一样 默认AES算法 密钥长度(128 256 512 位)
         cookieRememberMeManager.setCipherKey(Base64.decode("2AvVhdsgUs0FSA3SDFAdag=="));
@@ -255,7 +263,11 @@ public class ShiroConfig {
         //未授权界面;
         shiroFilterFactoryBean.setUnauthorizedUrl("/403");
         // 配置需要验证登录后访问的链接
-        filterChainDefinitionMap.put("/**", "authc,kickout");
+        //访问一般网页，如个人在主页之类的，我们使用user拦截器即可，
+        // user拦截器只要用户登录(isRemembered()==true or isAuthenticated()==true)通过即可访问成功；
+        //访问特殊网页，如我的订单，提交订单页面，我们使用authc拦截器即可，
+        // authc拦截器会判断用户是否是通过Subject.login（isAuthenticated()==true）登录的，如果是才放行，否则会跳转到登录页面叫你重新登录。
+        filterChainDefinitionMap.put("/**", "user,kickout");
         // 从数据库获取
 //        List<AdminMenu> list = systemService.selectAllMenu();
 //
