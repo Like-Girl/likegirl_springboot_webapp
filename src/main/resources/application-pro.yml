@@ -6,9 +6,9 @@ spring:
       max-wait: -1
       max-active: 1000
     timeout: 259200
-    host: 114.67.226.113
+    host: 106.15.184.22
     port: 6379
-    password: 123456
+    password: 123456789
 
 # 阿里数据源
 druid:

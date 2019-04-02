@@ -128,7 +128,6 @@
 			<version>1.9.6.2</version>
 		</dependency>
 
-
 		<!-- JDBC -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

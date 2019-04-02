@@ -7,6 +7,8 @@ import cn.like.girl.blog.config.shiro.realm.UserRealm;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.codec.Base64;
 import org.apache.shiro.crypto.CipherService;
+import org.apache.shiro.mgt.DefaultSessionStorageEvaluator;
+import org.apache.shiro.mgt.DefaultSubjectDAO;
 import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator;
 import org.apache.shiro.session.mgt.eis.SessionIdGenerator;
@@ -95,6 +97,7 @@ public class ShiroConfig {
     public RedisCacheManager cacheManager() {
         RedisCacheManager redisCacheManager = new RedisCacheManager();
         redisCacheManager.setRedisManager(redisManager());
+        redisCacheManager.setKeyPrefix("LG:SHIRO:CACHE:");
         return redisCacheManager;
     }
 
@@ -176,6 +179,7 @@ public class ShiroConfig {
         RedisSessionDAO redisSessionDAO = new RedisSessionDAO();
         redisSessionDAO.setRedisManager(redisManager());
         redisSessionDAO.setSessionIdGenerator(sessionIdGenerator());
+        redisSessionDAO.setKeyPrefix("LG:SHIRO:SESSION:");
         return redisSessionDAO;
     }
 
@@ -254,6 +258,7 @@ public class ShiroConfig {
         //拦截器.
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         // 配置不会被拦截的链接 顺序判断
+        filterChainDefinitionMap.put("/favicon.ico", "anon");
         filterChainDefinitionMap.put("/login", "anon");
         filterChainDefinitionMap.put("/user/login", "anon");
         filterChainDefinitionMap.put("/static/**", "anon");
@@ -299,6 +304,16 @@ public class ShiroConfig {
         // 自定义session管理
         securityManager.setSessionManager(sessionManager());
         securityManager.setRememberMeManager(rememberMeManager());//注入记住我管理器
+
+        /*
+         * 关闭shiro自带的session，详情见文档
+         * http://shiro.apache.org/session-management.html#SessionManagement-StatelessApplications%28Sessionless%29
+         */
+        DefaultSubjectDAO subjectDAO = new DefaultSubjectDAO();
+        DefaultSessionStorageEvaluator defaultSessionStorageEvaluator = new DefaultSessionStorageEvaluator();
+        defaultSessionStorageEvaluator.setSessionStorageEnabled(false);
+        subjectDAO.setSessionStorageEvaluator(defaultSessionStorageEvaluator);
+        securityManager.setSubjectDAO(subjectDAO);
         return securityManager;
     }
 
